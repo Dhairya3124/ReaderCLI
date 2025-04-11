@@ -10,19 +10,19 @@ const (
 	bodyview       = 2
 )
 
-type model struct {
+type Model struct {
 	state uint
 	// store Store
 	// textarea.Model
 }
 
-func NewModel() model {
-	return model{state: listview}
+func NewModel() Model {
+	return Model{state: listview}
 }
-func (m model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 
 }
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	return nil, nil
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	return m, nil
 }

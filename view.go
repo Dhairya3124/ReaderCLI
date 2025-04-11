@@ -1,5 +1,5 @@
 package main
 
-func (m model) View() string {
+func (m Model) View() string {
 	return "---ReaderCLI---"
 }

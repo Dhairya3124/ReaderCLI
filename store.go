@@ -5,13 +5,12 @@ import "database/sql"
 type Store struct {
 	db *sql.DB
 }
-type Article struct{
-	ID string
-	Title string
+type Article struct {
+	ID          string
+	Title       string
 	Description string
-	URL string
-	CreatedAt string
-
+	URL         string
+	CreatedAt   string
 }
 
 func (s *Store) Init() (*sql.DB, error) {

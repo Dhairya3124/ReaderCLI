@@ -35,5 +35,16 @@ func (m Model) Init() tea.Cmd {
 
 }
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg:=msg.(type){
+	case tea.KeyMsg:
+		key:=msg.String()
+		switch m.state{
+		case listview:
+			switch key{
+			case "q":
+				return m, tea.Quit
+			}
+		}
+	}
 	return m, nil
 }

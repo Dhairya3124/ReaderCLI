@@ -35,14 +35,29 @@ func (m Model) Init() tea.Cmd {
 
 }
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg:=msg.(type){
+	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		key:=msg.String()
-		switch m.state{
+		key := msg.String()
+		switch m.state {
 		case listview:
-			switch key{
+			switch key {
 			case "q":
 				return m, tea.Quit
+			case "a": // for creating a new article
+				m.state = titleview
+				// TODO: add input
+			case "up", "k":
+				if m.listIndex > 0 {
+					m.listIndex--
+				}
+			case "down", "j":
+				if m.listIndex < len(m.articles) {
+					m.listIndex++
+				}
+			case "enter":
+				m.currArticle = m.articles[m.listIndex]
+				m.state = bodyview
+
 			}
 		}
 	}

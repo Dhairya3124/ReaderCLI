@@ -22,6 +22,7 @@ func (s *Store) Init() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	s.db = db
 	return db, nil
 
 }

@@ -40,13 +40,12 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmds []tea.Cmd
-		cmd tea.Cmd
+		cmd  tea.Cmd
 	)
-	m.textinput,cmd = m.textinput.Update(msg)
+	m.textinput, cmd = m.textinput.Update(msg)
 	cmds = append(cmds, cmd)
-	m.textarea,cmd = m.textarea.Update(msg)
+	m.textarea, cmd = m.textarea.Update(msg)
 	cmds = append(cmds, cmd)
-
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -57,8 +56,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "q":
 				return m, tea.Quit
 			case "a": // for creating a new article
+				m.textinput.SetValue("")
+				m.textinput.Focus()
+				m.currArticle = Article{}
 				m.state = titleview
-				// TODO: add input
 			case "up", "k":
 				if m.listIndex > 0 {
 					m.listIndex--
@@ -69,8 +70,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			case "enter":
 				m.currArticle = m.articles[m.listIndex]
+				//TODO: add more fields to SetValue
+				m.textarea.SetValue(m.currArticle.Description)
+				m.textarea.Focus()
+				m.textarea.CursorEnd()
 				m.state = bodyview
-				// show textarea
 
 			}
 		}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	"github.com/charmbracelet/bubbles/textarea"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -19,7 +21,8 @@ type Model struct {
 	articles    []Article
 	currArticle Article
 	listIndex   int
-	// textarea.Model
+	textarea    textarea.Model
+	textinput   textinput.Model
 }
 
 func NewModel(store *Store) Model {
@@ -28,13 +31,23 @@ func NewModel(store *Store) Model {
 	if err != nil {
 		log.Fatalf("unable to get articles: %v", err)
 	}
-	return Model{state: listview, store: store, articles: articles}
+	return Model{state: listview, store: store, articles: articles, textarea: textarea.New(), textinput: textinput.New()}
 }
 func (m Model) Init() tea.Cmd {
 	return nil
 
 }
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var (
+		cmds []tea.Cmd
+		cmd tea.Cmd
+	)
+	m.textinput,cmd = m.textinput.Update(msg)
+	cmds = append(cmds, cmd)
+	m.textarea,cmd = m.textarea.Update(msg)
+	cmds = append(cmds, cmd)
+
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		key := msg.String()
@@ -57,9 +70,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 				m.currArticle = m.articles[m.listIndex]
 				m.state = bodyview
+				// show textarea
 
 			}
 		}
 	}
-	return m, nil
+	return m, tea.Batch(cmds...)
 }

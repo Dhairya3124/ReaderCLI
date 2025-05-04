@@ -77,6 +77,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = bodyview
 
 			}
+		case titleview:
+			switch key {
+			case "enter":
+				title := m.textinput.Value()
+				if title != "" {
+					m.currArticle.Title = title
+					m.textarea.SetValue("")
+					m.textarea.Focus()
+					m.textarea.CursorEnd()
+					m.state = bodyview
+				}
+
+			case "esc":
+				m.state = listview
+
+			}
+			
 		}
 	}
 	return m, tea.Batch(cmds...)

@@ -14,6 +14,11 @@ var (
 
 func (m Model) View() string {
 	s := appNameStyle.Render("ReaderCLI") + "\n\n"
+	if m.state == titleview {
+		s += "Article title:\n\n"
+		s += m.textinput.View() + "\n\n"
+		s += faintStyle.Render("enter - save,esq - discard")
+	}
 	if m.state == listview {
 		for i, a := range m.articles {
 			prefix := " "

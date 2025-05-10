@@ -19,6 +19,11 @@ func (m Model) View() string {
 		s += m.textinput.View() + "\n\n"
 		s += faintStyle.Render("enter - save,esq - discard")
 	}
+	if m.state == bodyview {
+		s += "Article:\n\n"
+		s += m.textarea.View() + "\n\n"
+		s += faintStyle.Render("ctrl+s - save,esq - discard")
+	}
 	if m.state == listview {
 		for i, a := range m.articles {
 			prefix := " "

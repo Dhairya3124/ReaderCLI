@@ -93,7 +93,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = listview
 
 			}
-			
+		case bodyview:
+			switch key {
+			case "ctrl+s":
+				body := m.textarea.Value()
+				m.currArticle.Description = body
+				ctx := context.Background()
+				if err := m.store.Create(ctx, &m.currArticle); err != nil {
+					//Todo: handle error
+					return m, tea.Quit
+				}
+				var err error
+				m.articles, err = m.store.GetArticles(ctx)
+				if err != nil {
+					//Todo: handle error
+					return m, tea.Quit
+				}
+				m.currArticle = Article{}
+				m.state = listview
+
+			case "esc":
+				m.state = listview
+
+			}
+
 		}
 	}
 	return m, tea.Batch(cmds...)

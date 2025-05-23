@@ -8,8 +8,8 @@ import (
 
 var (
 	appNameStyle    = lipgloss.NewStyle().Background(lipgloss.Color("99")).Padding(0, 1)
-	faintStyle      = lipgloss.NewStyle().Background(lipgloss.Color("255")).Faint(true)
-	enumeratorStyle = lipgloss.NewStyle().Background(lipgloss.Color("255")).MarginRight(1)
+	faintStyle      = lipgloss.NewStyle().Background(lipgloss.Color("99")).Faint(true)
+	enumeratorStyle = lipgloss.NewStyle().Background(lipgloss.Color("#04B575")).MarginRight(1)
 )
 
 func (m Model) View() string {

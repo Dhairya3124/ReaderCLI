@@ -2,7 +2,10 @@ module github.com/Dhairya3124/ReaderCLI
 
 go 1.24.1
 
-require github.com/charmbracelet/bubbletea v1.3.4
+require (
+	github.com/charmbracelet/bubbletea v1.3.4
+	github.com/go-chi/chi v1.5.5
+)
 
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect

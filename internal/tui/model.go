@@ -1,9 +1,11 @@
-package main
+package tui
 
 import (
 	"context"
+	"fmt"
 	"log"
 
+	store "github.com/Dhairya3124/ReaderCLI/internal/store"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -17,15 +19,15 @@ const (
 
 type Model struct {
 	state       uint
-	store       *Store
-	articles    []Article
-	currArticle Article
+	store       *store.Store
+	articles    []store.Article
+	currArticle store.Article
 	listIndex   int
 	textarea    textarea.Model
 	textinput   textinput.Model
 }
 
-func NewModel(store *Store) Model {
+func NewModel(store *store.Store) Model {
 	ctx := context.Background()
 	articles, err := store.GetArticles(ctx)
 	if err != nil {
@@ -58,7 +60,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "a": // for creating a new article
 				m.textinput.SetValue("")
 				m.textinput.Focus()
-				m.currArticle = Article{}
+				m.currArticle = store.Article{}
 				m.state = titleview
 			case "up", "k":
 				if m.listIndex > 0 {
@@ -101,15 +103,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				ctx := context.Background()
 				if err := m.store.Create(ctx, &m.currArticle); err != nil {
 					//Todo: handle error
+					fmt.Println(err)
 					return m, tea.Quit
 				}
 				var err error
 				m.articles, err = m.store.GetArticles(ctx)
 				if err != nil {
 					//Todo: handle error
+					fmt.Println(err)
 					return m, tea.Quit
 				}
-				m.currArticle = Article{}
+				m.currArticle = store.Article{}
 				m.state = listview
 
 			case "esc":

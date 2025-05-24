@@ -1,4 +1,4 @@
-package main
+package store
 
 import (
 	"context"
@@ -35,7 +35,7 @@ func (s *Store) Create(ctx context.Context, article *Article) error {
 	err := s.db.QueryRowContext(ctx, query,
 		article.Title,
 		article.Description,
-		article.URL).Scan(&article.ID, article.CreatedAt)
+		article.URL).Scan(&article.ID, &article.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (s *Store) Create(ctx context.Context, article *Article) error {
 }
 func (s *Store) GetArticles(ctx context.Context) ([]Article, error) {
 	query := `
-	SELECT * FROM articles
+	SELECT id,title,description,url,created_at FROM articles
 	`
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
@@ -54,7 +54,7 @@ func (s *Store) GetArticles(ctx context.Context) ([]Article, error) {
 	articles := []Article{}
 	for rows.Next() {
 		var a Article
-		err := rows.Scan(&a.ID, &a.CreatedAt, &a.Title, &a.Description, &a.URL)
+		err := rows.Scan(&a.ID, &a.Title, &a.Description, &a.URL, &a.CreatedAt)
 		if err != nil {
 			return nil, err
 		}

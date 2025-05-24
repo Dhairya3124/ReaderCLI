@@ -1,4 +1,4 @@
-package main
+package tui
 
 import (
 	"strings"
@@ -8,7 +8,7 @@ import (
 
 var (
 	appNameStyle    = lipgloss.NewStyle().Background(lipgloss.Color("99")).Padding(0, 1)
-	faintStyle      = lipgloss.NewStyle().Background(lipgloss.Color("99")).Faint(true)
+	faintStyle      = lipgloss.NewStyle().Background(lipgloss.Color("255")).Faint(true)
 	enumeratorStyle = lipgloss.NewStyle().Background(lipgloss.Color("#04B575")).MarginRight(1)
 )
 

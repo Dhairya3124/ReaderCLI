@@ -1,21 +1,20 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
-	"github.com/go-chi/chi"
+	"github.com/Dhairya3124/ReaderCLI/internal/api"
+	"github.com/Dhairya3124/ReaderCLI/internal/store"
+	"go.uber.org/zap"
 )
 
 func main() {
 
-	r := chi.NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ReaderCLI Server Running"))
-	})
-	srv := http.Server{
-		Addr:    ":3000",
-		Handler: r,
-	}
-	log.Fatal(srv.ListenAndServe())
+	// Logger
+	logger := zap.Must(zap.NewProduction()).Sugar()
+	defer logger.Sync()
+	store := new(store.Store)
+	config := api.Config{Addr: ":3000"}
+	app := api.NewServer(*store, config, logger)
+	mux := app.Mount()
+	logger.Fatal(app.Run(mux))
+
 }

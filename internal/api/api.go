@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/Dhairya3124/ReaderCLI/internal/store"
 	"github.com/go-chi/chi"
@@ -37,9 +36,12 @@ func (app *Application) Mount() http.Handler {
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
 	// processing should be stopped.
-	r.Use(middleware.Timeout(60 * time.Second))
+	// r.Use(middleware.Timeout(60 * time.Second))
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
+		r.Route("/articles", func(r chi.Router) {
+			r.Post("/", app.createArticleHandler)
+		})
 
 	})
 

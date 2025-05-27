@@ -12,6 +12,10 @@ func main() {
 	logger := zap.Must(zap.NewProduction()).Sugar()
 	defer logger.Sync()
 	store := new(store.Store)
+	if _, err := store.Init(); err != nil {
+		logger.Fatalf("unable to init store: %v", err)
+
+	}
 	config := api.Config{Addr: ":3000"}
 	app := api.NewServer(*store, config, logger)
 	mux := app.Mount()

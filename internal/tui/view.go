@@ -1,7 +1,7 @@
 package tui
 
 import (
-	"strings"
+	// "strings"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -10,6 +10,7 @@ var (
 	appNameStyle    = lipgloss.NewStyle().Background(lipgloss.Color("99")).Padding(0, 1)
 	faintStyle      = lipgloss.NewStyle().Background(lipgloss.Color("255")).Faint(true)
 	enumeratorStyle = lipgloss.NewStyle().Background(lipgloss.Color("#04B575")).MarginRight(1)
+	docStyle        = lipgloss.NewStyle().Margin(1, 2)
 )
 
 func (m Model) View() string {
@@ -25,18 +26,19 @@ func (m Model) View() string {
 		s += faintStyle.Render("ctrl+s - save,esq - discard")
 	}
 	if m.state == listview {
-		for i, a := range m.articles {
-			prefix := " "
-			if i == m.listIndex {
-				prefix = ">"
-			}
-			shortBody := strings.ReplaceAll(a.Description, "\n", " ")
-			if len(shortBody) > 30 {
-				shortBody = shortBody[:30]
-			}
-			s += enumeratorStyle.Render(prefix) + a.Title + " | " +
-				faintStyle.Render(shortBody) + "\n\n"
-		}
+		// for i, a := range m.articles {
+		// 	prefix := " "
+		// 	if i == m.listIndex {
+		// 		prefix = ">"
+		// 	}
+		// 	shortBody := strings.ReplaceAll(a.Description, "\n", " ")
+		// 	if len(shortBody) > 30 {
+		// 		shortBody = shortBody[:30]
+		// 	}
+		// 	s += enumeratorStyle.Render(prefix) + a.Title + " | " +
+		// 		faintStyle.Render(shortBody) + "\n\n"
+		// }
+		s += docStyle.Render(m.list.View())
 
 	}
 	s += faintStyle.Render("a - new article, q - quit")

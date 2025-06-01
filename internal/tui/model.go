@@ -6,6 +6,7 @@ import (
 	"log"
 
 	store "github.com/Dhairya3124/ReaderCLI/internal/store"
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -25,15 +26,26 @@ type Model struct {
 	listIndex   int
 	textarea    textarea.Model
 	textinput   textinput.Model
+	list        list.Model
+}
+type ArticleItem struct {
+	store.Article
 }
 
+func (a ArticleItem) Title() string { return a.Article.Title }
+
+func (a ArticleItem) FilterValue() string { return a.Article.Title }
 func NewModel(store *store.Store) Model {
 	ctx := context.Background()
 	articles, err := store.GetArticles(ctx)
 	if err != nil {
 		log.Fatalf("unable to get articles: %v", err)
 	}
-	return Model{state: listview, store: store, articles: articles, textarea: textarea.New(), textinput: textinput.New()}
+	items := make([]list.Item, len(articles))
+	for i, a := range articles {
+		items[i] = ArticleItem{a}
+	}
+	return Model{state: listview, store: store, articles: articles, textarea: textarea.New(), textinput: textinput.New(), list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
 }
 func (m Model) Init() tea.Cmd {
 	return nil

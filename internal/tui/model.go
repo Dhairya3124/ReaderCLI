@@ -2,7 +2,6 @@ package tui
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	store "github.com/Dhairya3124/ReaderCLI/internal/store"
@@ -23,43 +22,87 @@ type Model struct {
 	store       *store.Store
 	articles    []store.Article
 	currArticle store.Article
-	listIndex   int
 	textarea    textarea.Model
 	textinput   textinput.Model
 	list        list.Model
+	err         error
 }
+
 type ArticleItem struct {
 	store.Article
 }
 
-func (a ArticleItem) Title() string { return a.Article.Title }
-
+func (a ArticleItem) Title() string       { return a.Article.Title }
+func (a ArticleItem) Description() string { return a.Article.Description }
 func (a ArticleItem) FilterValue() string { return a.Article.Title }
+
 func NewModel(store *store.Store) Model {
 	ctx := context.Background()
 	articles, err := store.GetArticles(ctx)
 	if err != nil {
 		log.Fatalf("unable to get articles: %v", err)
 	}
+
 	items := make([]list.Item, len(articles))
 	for i, a := range articles {
 		items[i] = ArticleItem{a}
 	}
-	return Model{state: listview, store: store, articles: articles, textarea: textarea.New(), textinput: textinput.New(), list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
+
+	l := list.New(items, list.NewDefaultDelegate(), 0, 0)
+	l.Title = "Articles"
+
+	ta := textarea.New()
+	ta.Placeholder = "Enter article body..."
+
+	ti := textinput.New()
+	ti.Placeholder = "Enter article title..."
+
+	return Model{
+		state:     listview,
+		store:     store,
+		articles:  articles,
+		textarea:  ta,
+		textinput: ti,
+		list:      l,
+	}
 }
+
 func (m Model) Init() tea.Cmd {
 	return nil
-
 }
+
+func (m *Model) refreshArticles(ctx context.Context) error {
+	articles, err := m.store.GetArticles(ctx)
+	if err != nil {
+		return err
+	}
+
+	m.articles = articles
+	items := make([]list.Item, len(articles))
+	for i, a := range articles {
+		items[i] = ArticleItem{a}
+	}
+	m.list.SetItems(items)
+	return nil
+}
+
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmds []tea.Cmd
 		cmd  tea.Cmd
 	)
-	m.textinput, cmd = m.textinput.Update(msg)
-	cmds = append(cmds, cmd)
-	m.textarea, cmd = m.textarea.Update(msg)
-	cmds = append(cmds, cmd)
+
+	switch m.state {
+	case listview:
+		m.list, cmd = m.list.Update(msg)
+		cmds = append(cmds, cmd)
+	case titleview:
+		m.textinput, cmd = m.textinput.Update(msg)
+		cmds = append(cmds, cmd)
+	case bodyview:
+		m.textarea, cmd = m.textarea.Update(msg)
+		cmds = append(cmds, cmd)
+	}
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -67,30 +110,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch m.state {
 		case listview:
 			switch key {
-			case "q":
+			case "q", "ctrl+c":
 				return m, tea.Quit
-			case "a": // for creating a new article
+			case "a":
 				m.textinput.SetValue("")
 				m.textinput.Focus()
 				m.currArticle = store.Article{}
 				m.state = titleview
-			case "up", "k":
-				if m.listIndex > 0 {
-					m.listIndex--
-				}
-			case "down", "j":
-				if m.listIndex < len(m.articles) {
-					m.listIndex++
-				}
 			case "enter":
-				m.currArticle = m.articles[m.listIndex]
-				//TODO: add more fields to SetValue
-				m.textarea.SetValue(m.currArticle.Description)
-				m.textarea.Focus()
-				m.textarea.CursorEnd()
-				m.state = bodyview
-
+				if len(m.articles) > 0 {
+					selectedIndex := m.list.Index()
+					if selectedIndex < len(m.articles) {
+						m.currArticle = m.articles[selectedIndex]
+						m.textarea.SetValue(m.currArticle.Description)
+						m.textarea.Focus()
+						m.textarea.CursorEnd()
+						m.state = bodyview
+					}
+				}
 			}
+
 		case titleview:
 			switch key {
 			case "enter":
@@ -102,38 +141,44 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.textarea.CursorEnd()
 					m.state = bodyview
 				}
-
 			case "esc":
+				m.textinput.Blur()
 				m.state = listview
-
 			}
+
 		case bodyview:
 			switch key {
 			case "ctrl+s":
 				body := m.textarea.Value()
 				m.currArticle.Description = body
 				ctx := context.Background()
+
 				if err := m.store.Create(ctx, &m.currArticle); err != nil {
-					//Todo: handle error
-					fmt.Println(err)
-					return m, tea.Quit
+					m.err = err
+					return m, nil
 				}
-				var err error
-				m.articles, err = m.store.GetArticles(ctx)
-				if err != nil {
-					//Todo: handle error
-					fmt.Println(err)
-					return m, tea.Quit
+
+				if err := m.refreshArticles(ctx); err != nil {
+					m.err = err
+					return m, nil
 				}
+
 				m.currArticle = store.Article{}
+				m.textarea.Blur()
 				m.state = listview
 
 			case "esc":
+				m.textarea.Blur()
+				m.currArticle = store.Article{}
 				m.state = listview
-
 			}
-
 		}
+	case tea.WindowSizeMsg:
+		h, v := docStyle.GetFrameSize()
+		m.list.SetSize(msg.Width-h, msg.Height-v)
+		m.textarea.SetWidth(msg.Width - h)
+		m.textarea.SetHeight(msg.Height - v - 5)
 	}
+
 	return m, tea.Batch(cmds...)
 }

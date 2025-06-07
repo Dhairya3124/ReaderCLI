@@ -52,10 +52,8 @@ func NewModel(store *store.Store) Model {
 	l.Title = "Articles"
 
 	ta := textarea.New()
-	ta.Placeholder = "Enter article body..."
 
 	ti := textinput.New()
-	ti.Placeholder = "Enter article title..."
 
 	return Model{
 		state:     listview,

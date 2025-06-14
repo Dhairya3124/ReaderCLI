@@ -3,7 +3,7 @@
 include .envrc
 # Variables
 GOOSE_CMD=goose
-DB_DIR=./migrations/schema
+DB_DIR=./internal/migrations/schema
 
 # Targets
 .PHONY: create-migration up down status

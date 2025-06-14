@@ -18,7 +18,7 @@ type Article struct {
 }
 
 func (s *Store) Init() (*sql.DB, error) {
-	db, err := sql.Open("postgres", "postgres://admin:adminpassword@localhost/readercliDB?sslmode=disable")
+	db, err := sql.Open("postgres", "postgres://admin:adminpassword@localhost:5432/readercliDB?sslmode=disable")
 	if err != nil {
 		return nil, err
 	}

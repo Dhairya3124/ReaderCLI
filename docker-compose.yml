@@ -4,14 +4,40 @@ services:
   db:
     image: postgres:16.3
     container_name: postgres-db
+    networks:
+      - app-network
     environment:
       POSTGRES_DB: readercliDB
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: adminpassword
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d readercliDB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  readercli-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - app-network
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://admin:adminpassword@localhost:5432/readercliDB?sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   db-data:
